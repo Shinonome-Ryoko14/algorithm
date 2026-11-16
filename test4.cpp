@@ -1,94 +1,54 @@
 #include <bits/stdc++.h>
-#include <vector>
 using namespace std;
 using i64 = long long;
+
+i64 calc(i64 x, const vector<i64> &L, const vector<i64> &R) {
+  i64 cost = 0;
+  for (int i = 0; i < L.size(); i++) {
+    if (L[i] > x) {
+      cost += (L[i] - x) * (L[i] - x);
+    } else if (R[i] < x) {
+      cost += (x - R[i]) * (x - R[i]);
+    }
+  }
+
+  return cost;
+}
 
 void solve() {
   int n;
   cin >> n;
-  vector<pair<int, int>> i(n, {0, 0});
-  for (int j = 0; j < n; j++) {
-    int f = 0, s = 0;
-    cin >> f >> s;
-    i[j] = {f, s};
+  vector<i64> L(n);
+  vector<i64> R(n);
+  for (int i = 0; i < n; i++) {
+    cin >> L[i] >> R[i];
   }
-  sort(i.begin(), i.end(),
-       [](pair<int, int> a, pair<int, int> b) { return a.second < b.second; });
-  vector<int> m;
-  vector<int> q;
-  vector<int> vis(n, 1);
-  int math = i[0].first;
-  m.push_back(math);
-  q.push_back(0);
-  for (int j = 1; j < n; j++) {
-    if (math == i[j].first) {
-      continue;
-    } else {
-      math = i[j].first;
-      q.push_back(j);
-      m.push_back(math);
-    }
-  }
-  int size = m.size();
-  vector<int> s(size, 0);
-  /*vector<int> q(size, 0);
-  for (int j = 0; j < m.size(); j++) {
-    auto it = lower_bound(i.begin(), i.end(), pair{m[j], 0});
-    q[j] = it - i.begin();
-  }*/
-  int a = 0;
-  i64 sum = 0;
-  int bei = 1;
-  while (a < n) {
-    while (vis[a] == 0) {
-      a++;
-    }
-    if (a == n) {
-      break;
-    }
-    // int bei=1;
-    int start = a;
-    auto it = lower_bound(m.begin(), m.end(), i[start].first);
-    int loc = it - m.begin();
-    int loc_1 = loc + 1;
-    vis[q[loc] + s[loc]] = 0;
-    s[loc]++;
-    /*if ( loc_1==q.size() ){
-      if ( q[loc_1]+s[loc_1]<i.size() ){
 
-      }
-    } else
-    */
-    while (m[loc_1] == m[loc] + 1) {
-      if (loc == m.size()) {
-        if (q[loc] + s[loc] == n - 1) {
-          sum += i[q[loc] + s[loc]].first * bei;
-          vis[q[loc] + s[loc]] = 0;
-          break;
-        } else {
-          bei++;
-        }
-      } else if (q[loc_1] + s[loc_1] == q[loc_1 + 1]) {
-        sum += i[q[loc] + s[loc]].first * bei;
-        vis[q[loc] + s[loc]] = 0;
-        bei = 1;
-        break;
-      } else {
-        bei++;
-        sum += bei * i[q[loc_1] + s[loc_1]].first;
-        vis[q[loc_1] + s[loc_1]] = 0;
-        loc_1++, loc++;
-        if (m[loc_1] != m[loc] + 1) {
-          bei = 1;
-        }
-      }
-    }
-    if (m[loc_1] != m[loc] + 1) {
-      sum += bei * i[q[loc] + s[loc]].first;
-      bei = 1;
+  i64 L_max = *max_element(L.begin(), L.end());
+  i64 R_min = *min_element(R.begin(), R.end());
+
+  i64 l = R_min;
+  i64 r = L_max;
+  i64 ans = min(calc(l, L, R), calc(r, L, R));
+
+  while (r - l > 3) {
+    i64 m1 = l + (r - l) / 3;
+    i64 m2 = r - (r - l) / 3;
+
+    i64 cost1 = calc(m1, L, R);
+    i64 cost2 = calc(m2, L, R);
+
+    if (cost1 < cost2) {
+      r = m2;
+    } else {
+      l = m1;
     }
   }
-  cout << sum << endl;
+
+  for (i64 i = l; i <= r; i++) {
+    ans = min(ans, calc(i, L, R));
+  }
+  cout << ans << "\n";
 }
 
 int main() {
